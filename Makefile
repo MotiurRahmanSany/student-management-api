@@ -1,8 +1,18 @@
-# Define the go command
-GOCMD = go
+-include .env
+export
 
-# Phony targets are not actual files; they are just a name for a set of commands
-.PHONY: tidy
+DB_DSN := host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable
 
-tidy:
-	$(GOCMD) mod tidy
+.PHONY: sqlc migrate-up migrate-down run
+
+sqlc:
+	sqlc generate
+
+migrate-up:
+	goose -dir sql/migrations postgres "$(DB_DSN)" up
+
+migrate-down:
+	goose -dir sql/migrations postgres "$(DB_DSN)" down
+
+run:
+	air
