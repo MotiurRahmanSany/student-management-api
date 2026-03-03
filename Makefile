@@ -14,5 +14,7 @@ migrate-up:
 migrate-down:
 	goose -dir sql/migrations postgres "$(DB_DSN)" down
 
+## Run the application with Docker Compose and Air for live reloading
 run:
+	docker compose up -d
 	air
