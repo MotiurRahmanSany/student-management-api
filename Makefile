@@ -18,3 +18,8 @@ migrate-down:
 run:
 	docker compose up -d
 	air
+
+## Stop the application and remove containers
+stop:
+	docker compose down
+	
