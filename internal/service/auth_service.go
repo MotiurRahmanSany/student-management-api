@@ -21,6 +21,7 @@ type LoginResponse struct {
 type AuthService interface {
 	Register(ctx context.Context, email, password string) (domain.User, error)
 	Login(ctx context.Context, email, password string) (LoginResponse, error)
+	GetMe(ctx context.Context, userID string) (domain.User, error)
 }
 
 type authService struct {
@@ -78,4 +79,8 @@ func (s *authService) Login(ctx context.Context, email, password string) (LoginR
 
 	return res, nil
 
+}
+
+func (s *authService) GetMe(ctx context.Context, userID string) (domain.User, error) {
+	return s.userRepo.GetUserByID(ctx, userID)
 }

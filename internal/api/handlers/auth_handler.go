@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/MotiurRahmanSany/student-management-api/internal/api/middleware"
 	"github.com/MotiurRahmanSany/student-management-api/internal/response"
 	"github.com/MotiurRahmanSany/student-management-api/internal/service"
 )
@@ -72,4 +73,20 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = response.Success(w, http.StatusOK, "User logged in successfully", loginResponse)
+}
+
+func (h *AuthHandler) GetMe(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserContextKey).(string)
+	if !ok || userID == "" {
+		_ = response.Error(w, http.StatusUnauthorized, "Unauthorized", nil)
+		return
+	}
+
+	user, err := h.service.GetMe(r.Context(), userID)
+	if err != nil {
+		_ = response.Error(w, http.StatusInternalServerError, "Failed to retrieve user", nil)
+		return
+	}
+
+	_ = response.Success(w, http.StatusOK, "User retrieved successfully", user)
 }
