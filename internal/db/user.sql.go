@@ -19,7 +19,7 @@ INSERT INTO users (
 ) VALUES (
     $1, $2, $3
 )
-RETURNING id, email, role, created_at, updated_at
+RETURNING id, email, role, is_active, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -32,6 +32,7 @@ type CreateUserRow struct {
 	ID        pgtype.UUID      `json:"id"`
 	Email     string           `json:"email"`
 	Role      string           `json:"role"`
+	IsActive  bool             `json:"is_active"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 	UpdatedAt pgtype.Timestamp `json:"updated_at"`
 }
@@ -43,6 +44,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.ID,
 		&i.Email,
 		&i.Role,
+		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -60,29 +62,21 @@ func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, password_hash, role, created_at, updated_at
+SELECT id, email, password_hash, role, is_active,  created_at, updated_at
 FROM users
 WHERE email = $1
 LIMIT 1
 `
 
-type GetUserByEmailRow struct {
-	ID           pgtype.UUID      `json:"id"`
-	Email        string           `json:"email"`
-	PasswordHash string           `json:"password_hash"`
-	Role         string           `json:"role"`
-	CreatedAt    pgtype.Timestamp `json:"created_at"`
-	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
-}
-
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
-	var i GetUserByEmailRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
 		&i.PasswordHash,
 		&i.Role,
+		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -90,29 +84,21 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, password_hash, role, created_at, updated_at
+SELECT id, email, password_hash, role, is_active,  created_at, updated_at
 FROM users
 WHERE id = $1
 LIMIT 1
 `
 
-type GetUserByIDRow struct {
-	ID           pgtype.UUID      `json:"id"`
-	Email        string           `json:"email"`
-	PasswordHash string           `json:"password_hash"`
-	Role         string           `json:"role"`
-	CreatedAt    pgtype.Timestamp `json:"created_at"`
-	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
-}
-
-func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (GetUserByIDRow, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
-	var i GetUserByIDRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
 		&i.PasswordHash,
 		&i.Role,
+		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -120,7 +106,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (GetUserByIDR
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, email, role, created_at, updated_at
+SELECT id, email, role, is_active, created_at, updated_at
 FROM users
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
@@ -135,6 +121,7 @@ type ListUsersRow struct {
 	ID        pgtype.UUID      `json:"id"`
 	Email     string           `json:"email"`
 	Role      string           `json:"role"`
+	IsActive  bool             `json:"is_active"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 	UpdatedAt pgtype.Timestamp `json:"updated_at"`
 }
@@ -152,6 +139,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUse
 			&i.ID,
 			&i.Email,
 			&i.Role,
+			&i.IsActive,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
