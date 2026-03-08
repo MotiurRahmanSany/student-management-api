@@ -90,3 +90,13 @@ func (h *AuthHandler) GetMe(w http.ResponseWriter, r *http.Request) {
 
 	_ = response.Success(w, http.StatusOK, "User retrieved successfully", user)
 }
+
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	// With stateless JWT, the server has nothing to clean up.
+    // The client must discard the access token.
+    // When refresh tokens are added, this will revoke the refresh token in DB.
+
+	_ = response.Success(w, http.StatusOK, "User logged out successfully", nil)
+
+}

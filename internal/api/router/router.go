@@ -21,6 +21,7 @@ func Setup(authHandler *handlers.AuthHandler, jwtManager *auth.JWTManager) *http
 	// Protected Routes - require authentication
 	authMw := middleware.AuthMiddleware(jwtManager)
 	mux.Handle("/auth/me", authMw(http.HandlerFunc(authHandler.GetMe)))
+	mux.Handle("/auth/logout", authMw(http.HandlerFunc(authHandler.Logout)))
 
 	return mux
 }
