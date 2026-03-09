@@ -30,9 +30,11 @@ func serve(config *config.Config) {
 	jwtManager := auth.NewJWTManager(config.JwtSecretKey, time.Minute*10)
 
 	authService := service.NewAuthService(userRepo, tokenRepo, jwtManager)
+
+	healthHandler := handlers.NewHealthHandler()
 	authHandler := handlers.NewAuthHandler(authService)
 
-	mux := router.Setup(authHandler, jwtManager)
+	mux := router.Setup(healthHandler, authHandler, jwtManager)
 
 	fmt.Printf("Server is running on port %d\n", config.HttpPort)
 	fmt.Printf("Base Url is: http:localhost:%d", config.HttpPort)
