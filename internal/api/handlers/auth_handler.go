@@ -4,11 +4,21 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/mail"
 
 	"github.com/MotiurRahmanSany/student-management-api/internal/api/middleware"
 	"github.com/MotiurRahmanSany/student-management-api/internal/response"
 	"github.com/MotiurRahmanSany/student-management-api/internal/service"
 )
+
+type RegisterReq struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type RefreshTokenReq struct {
+	RefreshToken string `json:"refresh_token"`
+}
 
 type AuthHandler struct {
 	service service.AuthService
@@ -20,9 +30,10 @@ func NewAuthHandler(s service.AuthService) *AuthHandler {
 	}
 }
 
-type RegisterReq struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+func isValidEmail(email string) bool {
+	// Simple net/mail validation
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +46,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	if req.Email == "" || req.Password == "" {
 		_ = response.Error(w, http.StatusBadRequest, "Email and password are required", nil)
+		return
+	}
+
+	if !isValidEmail(req.Email) {
+		_ = response.Error(w, http.StatusBadRequest, "Invalid email format", nil)
 		return
 	}
 
@@ -91,12 +107,56 @@ func (h *AuthHandler) GetMe(w http.ResponseWriter, r *http.Request) {
 	_ = response.Success(w, http.StatusOK, "User retrieved successfully", user)
 }
 
+func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	var req RefreshTokenReq
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		_ = response.Error(w, http.StatusBadRequest, "Invalid request body", nil)
+		return
+
+	}
+
+	if req.RefreshToken == "" {
+		_ = response.Error(w, http.StatusBadRequest, "Refresh token is required", nil)
+		return
+	}
+
+	loginResponse, err := h.service.RefreshToken(r.Context(), req.RefreshToken)
+
+	if err != nil{
+		if errors.Is(err, service.ErrInvalidRefreshToken){
+			_ = response.Error(w, http.StatusUnauthorized, "Invalid or expired refresh token", nil)
+			return
+		}
+		_ = response.Error(w, http.StatusInternalServerError, "Failed to refresh token", nil)
+		return
+	}
+
+	_ = response.Success(w, http.StatusOK, "Token refreshed successfully", loginResponse)
+}
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	// With stateless JWT, the server has nothing to clean up.
-    // The client must discard the access token.
-    // When refresh tokens are added, this will revoke the refresh token in DB.
+	var req RefreshTokenReq
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		_ = response.Error(w, http.StatusBadRequest, "Invalid request body", nil)
+		return
+	}
+
+	if req.RefreshToken == "" {
+		_ = response.Error(w, http.StatusBadRequest, "Refresh token is required", nil)
+		return
+	}
+
+	if err := h.service.Logout(r.Context(), req.RefreshToken); err != nil {
+		if errors.Is(err, service.ErrInvalidRefreshToken){
+			_ = response.Error(w, http.StatusUnauthorized, "Invalid or expired refresh token", nil)
+			return
+		}
+
+		_ = response.Error(w, http.StatusInternalServerError, "Failed to logout", nil)
+		return
+	}
 
 	_ = response.Success(w, http.StatusOK, "User logged out successfully", nil)
-
 }

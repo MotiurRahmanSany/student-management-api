@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -21,6 +23,15 @@ func NewJWTManager(secret string, ttl time.Duration) *JWTManager {
 		secretKey: secret,
 		ttl:       ttl,
 	}
+}
+
+// GenerateRefreshToken creates a cryptographically random token string
+func GenerateRefreshToken() (string, error) {
+	bytes := make([]byte, 32) // 32 bytes = 64 hex chars
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }
 
 func (j *JWTManager) Generate(userID string) (string, error) {

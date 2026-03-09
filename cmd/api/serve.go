@@ -26,10 +26,10 @@ func serve(config *config.Config) {
 	queries := db.New(pool)
 
 	userRepo := repository.NewUserRepository(queries)
-	// tokenRepo := repository.NewTokenRepository(queries)
-	jwtManager := auth.NewJWTManager(config.JwtSecretKey, time.Hour*24)
+	tokenRepo := repository.NewTokenRepository(queries)
+	jwtManager := auth.NewJWTManager(config.JwtSecretKey, time.Minute*10)
 
-	authService := service.NewAuthService(userRepo, jwtManager)
+	authService := service.NewAuthService(userRepo, tokenRepo, jwtManager)
 	authHandler := handlers.NewAuthHandler(authService)
 
 	mux := router.Setup(authHandler, jwtManager)

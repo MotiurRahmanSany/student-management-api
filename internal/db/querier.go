@@ -15,6 +15,7 @@ type Querier interface {
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (CreateRefreshTokenRow, error)
 	CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	DeleteAllUserTokens(ctx context.Context, userID pgtype.UUID) error
 	DeleteCourse(ctx context.Context, id int64) error
 	DeleteExpiredTokens(ctx context.Context) error
 	DeleteStudent(ctx context.Context, id int64) error

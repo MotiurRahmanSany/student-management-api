@@ -12,16 +12,17 @@ import (
 func Setup(authHandler *handlers.AuthHandler, jwtManager *auth.JWTManager) *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		_ = response.Success(w, http.StatusOK, "Health check successful", nil)
 	})
-	mux.HandleFunc("/auth/register", authHandler.Register)
-	mux.HandleFunc("/auth/login", authHandler.Login)
+	mux.HandleFunc("POST /auth/register", authHandler.Register)
+	mux.HandleFunc("POST /auth/login", authHandler.Login)
+	mux.HandleFunc("POST /auth/refresh", authHandler.RefreshToken)
 
 	// Protected Routes - require authentication
 	authMw := middleware.AuthMiddleware(jwtManager)
-	mux.Handle("/auth/me", authMw(http.HandlerFunc(authHandler.GetMe)))
-	mux.Handle("/auth/logout", authMw(http.HandlerFunc(authHandler.Logout)))
+	mux.Handle("GET /auth/me", authMw(http.HandlerFunc(authHandler.GetMe)))
+	mux.Handle("POST /auth/logout", authMw(http.HandlerFunc(authHandler.Logout)))
 
 	return mux
 }

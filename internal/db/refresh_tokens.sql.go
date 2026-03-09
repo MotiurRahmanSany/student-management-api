@@ -49,6 +49,16 @@ func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshToken
 	return i, err
 }
 
+const deleteAllUserTokens = `-- name: DeleteAllUserTokens :exec
+DELETE FROM refresh_tokens
+WHERE user_id = $1
+`
+
+func (q *Queries) DeleteAllUserTokens(ctx context.Context, userID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteAllUserTokens, userID)
+	return err
+}
+
 const deleteExpiredTokens = `-- name: DeleteExpiredTokens :exec
 DELETE FROM refresh_tokens
 WHERE expires_at < NOW()
