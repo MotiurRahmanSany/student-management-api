@@ -11,7 +11,7 @@ import (
 	"github.com/MotiurRahmanSany/student-management-api/internal/service"
 )
 
-type RegisterReq struct {
+type RegisterUserReq struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -37,10 +37,10 @@ func isValidEmail(email string) bool {
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var req RegisterReq
+	var req RegisterUserReq
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		_ = response.Error(w, http.StatusBadRequest, "Invalid request body", err)
+		_ = response.Error(w, http.StatusBadRequest, "Invalid request body", nil)
 		return
 	}
 
@@ -74,7 +74,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var req RegisterReq
+	var req RegisterUserReq
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		_ = response.Error(w, http.StatusBadRequest, "Invalid request body", nil)

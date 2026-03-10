@@ -25,16 +25,25 @@ func serve(config *config.Config) {
 	defer pool.Close()
 	queries := db.New(pool)
 
-	userRepo := repository.NewUserRepository(queries)
-	tokenRepo := repository.NewTokenRepository(queries)
 	jwtManager := auth.NewJWTManager(config.JwtSecretKey, time.Minute*10)
+	tokenRepo := repository.NewTokenRepository(queries)
+
+	userRepo := repository.NewUserRepository(queries)
+	studentRepo := repository.NewStudentRepository(queries)
 
 	authService := service.NewAuthService(userRepo, tokenRepo, jwtManager)
+	studentService := service.NewStudentService(studentRepo)
 
 	healthHandler := handlers.NewHealthHandler()
 	authHandler := handlers.NewAuthHandler(authService)
+	studentHandler := handlers.NewStudentHandler(studentService)
 
-	mux := router.Setup(healthHandler, authHandler, jwtManager)
+	mux := router.Setup(
+		jwtManager,
+		healthHandler,
+		authHandler,
+		studentHandler,
+	)
 
 	fmt.Printf("Server is running on port %d\n", config.HttpPort)
 	fmt.Printf("Base Url is: http:localhost:%d", config.HttpPort)
