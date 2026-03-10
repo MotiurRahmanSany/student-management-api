@@ -36,6 +36,9 @@ func NewStudentHandler(s service.StudentService) *StudentHandler {
 }
 
 func (h *StudentHandler) RegisterStudent(w http.ResponseWriter, r *http.Request) {
+
+	defer r.Body.Close()
+
 	userID, ok := r.Context().Value(middleware.UserContextKey).(string)
 	if !ok || userID == "" {
 		_ = response.Error(w, http.StatusUnauthorized, "Unauthorized", nil)
@@ -48,7 +51,6 @@ func (h *StudentHandler) RegisterStudent(w http.ResponseWriter, r *http.Request)
 		_ = response.Error(w, http.StatusBadRequest, "Invalid request body", nil)
 		return
 	}
-	defer r.Body.Close()
 
 	if req.FullName == "" || req.DateOfBirth == "" || req.Department == "" {
 		_ = response.Error(w, http.StatusBadRequest, "Full name, date of birth, and department are required", nil)
@@ -139,6 +141,8 @@ func (h *StudentHandler) GetStudentByID(w http.ResponseWriter, r *http.Request) 
 }
 func (h *StudentHandler) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 
+	defer r.Body.Close()
+
 	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	if err != nil {
 		_ = response.Error(w, http.StatusBadRequest, "Invalid student ID", nil)
@@ -151,7 +155,6 @@ func (h *StudentHandler) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 		_ = response.Error(w, http.StatusBadRequest, "Invalid request body", nil)
 		return
 	}
-	defer r.Body.Close()
 
 	var dob *time.Time
 

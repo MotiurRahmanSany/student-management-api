@@ -33,13 +33,15 @@ func NewCourseHandler(service service.CourseService) *CourseHandler {
 }
 
 func (h *CourseHandler) CreateCourse(w http.ResponseWriter, r *http.Request) {
+	
+	defer r.Body.Close()
+
 	var req CreateCourseRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		_ = response.Error(w, http.StatusBadRequest, "Invalid request body", nil)
 		return
 	}
-	defer r.Body.Close()
 
 	if req.Capacity <= 0 || req.Credit <= 0 || req.Title == "" || req.Code == "" {
 		_ = response.Error(w, http.StatusBadRequest, "Please provide valid course details", nil)
@@ -120,6 +122,9 @@ func (h *CourseHandler) GetCourseByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CourseHandler) UpdateCourse(w http.ResponseWriter, r *http.Request) {
+	
+	defer r.Body.Close()
+	
 	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	if err != nil {
 		_ = response.Error(w, http.StatusBadRequest, "Invalid course ID", nil)
@@ -132,7 +137,6 @@ func (h *CourseHandler) UpdateCourse(w http.ResponseWriter, r *http.Request) {
 		_ = response.Error(w, http.StatusBadRequest, "Invalid course body", nil)
 		return
 	}
-	defer r.Body.Close()
 	
 	course, err := h.service.UpdateCourse(r.Context(), id, req.Title, req.Code, req.Credit, req.Capacity)
 	if err != nil {
