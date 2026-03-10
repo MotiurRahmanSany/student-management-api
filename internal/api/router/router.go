@@ -13,6 +13,7 @@ func Setup(
 	healthHandler *handlers.HealthHandler,
 	authHandler *handlers.AuthHandler,
 	studentHandler *handlers.StudentHandler,
+	courseHandler *handlers.CourseHandler,
 ) *http.ServeMux {
 	mux := http.NewServeMux()
 
@@ -39,6 +40,13 @@ func Setup(
 	mux.Handle("GET /students/{id}", authMw(http.HandlerFunc(studentHandler.GetStudentByID))) // Expecting /students/{id}
 	mux.Handle("PATCH /students/{id}", authMw(http.HandlerFunc(studentHandler.UpdateStudent))) // Expecting /students/{id}
 	mux.Handle("DELETE /students/{id}", authMw(http.HandlerFunc(studentHandler.DeleteStudent))) // Expecting /students/{id} 
-
+	
+	// course
+	mux.Handle("POST /courses", authMw(http.HandlerFunc(courseHandler.CreateCourse)))
+	mux.Handle("GET /courses", authMw(http.HandlerFunc(courseHandler.ListAllCourses)))
+	mux.Handle("GET /courses/{id}", authMw(http.HandlerFunc(courseHandler.GetCourseByID))) // Expecting /courses/{id}
+	mux.Handle("PATCH /courses/{id}", authMw(http.HandlerFunc(courseHandler.UpdateCourse))) // Expecting /courses/{id}
+	mux.Handle("DELETE /courses/{id}", authMw(http.HandlerFunc(courseHandler.DeleteCourse))) // Expecting /courses/{id}
+	
 	return mux
 }

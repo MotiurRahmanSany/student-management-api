@@ -30,23 +30,27 @@ func serve(config *config.Config) {
 
 	userRepo := repository.NewUserRepository(queries)
 	studentRepo := repository.NewStudentRepository(queries)
+	courseRepo := repository.NewCourseRepository(queries)
 
 	authService := service.NewAuthService(userRepo, tokenRepo, jwtManager)
 	studentService := service.NewStudentService(studentRepo)
+	courseService := service.NewCourseService(courseRepo)
 
 	healthHandler := handlers.NewHealthHandler()
 	authHandler := handlers.NewAuthHandler(authService)
 	studentHandler := handlers.NewStudentHandler(studentService)
+	courseHandler := handlers.NewCourseHandler(courseService)
 
 	mux := router.Setup(
 		jwtManager,
 		healthHandler,
 		authHandler,
 		studentHandler,
+		courseHandler,
 	)
 
 	fmt.Printf("Server is running on port %d\n", config.HttpPort)
-	fmt.Printf("Base Url is: http:localhost:%d", config.HttpPort)
+	fmt.Printf("Base Url is: http:localhost:%d\n", config.HttpPort)
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", config.HttpPort), mux); err != nil {
 		fmt.Printf("Error starting server: %v\n", err.Error())

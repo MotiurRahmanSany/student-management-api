@@ -21,7 +21,7 @@ type StudentService interface {
 var (
 	ErrStudentAlreadyExists = errors.New("Student with the given user ID already exists")
 	ErrStudentNotFound      = errors.New("Student not found")
-	ErrNoFieldsProvided     = errors.New("No fields provided for update")
+	ErrNoFieldsProvidedForUpdate     = errors.New("No field provided for update")
 	ErrInvalidStatus        = errors.New("Invalid status value")
 )
 
@@ -88,7 +88,7 @@ func (s *studentService) UpdateStudent(ctx context.Context, id int64, fullName *
 	}
 
 	if fullName == nil && dob == nil && dept == nil && status == nil {
-		return domain.Student{}, ErrNoFieldsProvided
+		return domain.Student{}, ErrNoFieldsProvidedForUpdate
 	}
 	if fullName != nil {
 		student.FullName = *fullName

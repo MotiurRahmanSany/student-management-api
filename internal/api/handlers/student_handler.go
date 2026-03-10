@@ -128,7 +128,7 @@ func (h *StudentHandler) GetStudentByID(w http.ResponseWriter, r *http.Request) 
 	student, err := h.service.GetStudentByID(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, service.ErrStudentNotFound) {
-			_ = response.Error(w, http.StatusNotFound, "Student not found", err)
+			_ = response.Error(w, http.StatusNotFound, "Student not found", nil)
 		} else {
 			_ = response.Error(w, http.StatusInternalServerError, "Failed to retrieve student", err)
 		}
@@ -178,7 +178,7 @@ func (h *StudentHandler) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 			_ = response.Error(w, http.StatusNotFound, "Student not found", nil)
 			return
 		}
-		if errors.Is(err, service.ErrNoFieldsProvided) {
+		if errors.Is(err, service.ErrNoFieldsProvidedForUpdate) {
 			_ = response.Error(w, http.StatusBadRequest, "No fields provided for update", nil)
 			return
 		}
