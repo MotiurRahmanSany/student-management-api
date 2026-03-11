@@ -139,6 +139,26 @@ func (h *StudentHandler) GetStudentByID(w http.ResponseWriter, r *http.Request) 
 
 	_ = response.Success(w, http.StatusOK, "Student retrieved successfully", student)
 }
+
+func (h *StudentHandler) GetStudentByUserID(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserContextKey).(string)
+	if !ok || userID == "" {
+		_ = response.Error(w, http.StatusUnauthorized, "Unauthorized", nil)
+		return
+	}
+	
+	student, err := h.service.GetStudentByUserID(r.Context(), userID)
+	if err != nil {
+		if errors.Is(err, service.ErrStudentProfileNotFound) {
+			_ = response.Error(w, http.StatusNotFound, "Student profile not found", nil)
+		} else {
+			_ = response.Error(w, http.StatusInternalServerError, "Failed to retrieve student", err)
+		}
+		return
+	}
+	_ = response.Success(w, http.StatusOK, "Student retrieved successfully", student)
+}
+
 func (h *StudentHandler) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()

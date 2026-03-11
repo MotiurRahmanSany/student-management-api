@@ -12,6 +12,7 @@ import (
 
 type StudentService interface {
 	RegisterStudent(ctx context.Context, userID, fullName string, dob time.Time, dept string) (domain.Student, error)
+	GetStudentByUserID(ctx context.Context, userID string) (domain.Student, error)
 	ListAllStudents(ctx context.Context, limit, offset int32) ([]domain.Student, error)
 	GetStudentByID(ctx context.Context, id int64) (domain.Student, error)
 	UpdateStudent(ctx context.Context, id int64, fullName *string, dob *time.Time, dept *string, status *string) (domain.Student, error)
@@ -21,6 +22,7 @@ type StudentService interface {
 var (
 	ErrStudentAlreadyExists = errors.New("Student with the given user ID already exists")
 	ErrStudentNotFound      = errors.New("Student not found")
+	ErrStudentProfileNotFound = errors.New("Student profile not created yet")
 	ErrNoFieldsProvidedForUpdate     = errors.New("No field provided for update")
 	ErrInvalidStatus        = errors.New("Invalid status value")
 )
@@ -61,6 +63,18 @@ func (s *studentService) RegisterStudent(ctx context.Context, userID, fullName s
 
 	return createdStudent, nil
 }
+
+func (s *studentService) GetStudentByUserID(ctx context.Context, userID string) (domain.Student, error) {
+	student, err := s.studentRepo.GetStudentByUserID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Student{}, ErrStudentProfileNotFound
+		}
+		return domain.Student{}, err
+	}
+	return student, nil
+}
+
 
 func (s *studentService) ListAllStudents(ctx context.Context, limit, offset int32) ([]domain.Student, error) {
 	return s.studentRepo.ListStudents(ctx, limit, offset)

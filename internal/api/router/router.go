@@ -39,7 +39,8 @@ func Setup(
 	// student
 	mux.Handle("POST /students", authMw(http.HandlerFunc(studentHandler.RegisterStudent)))
 	mux.Handle("GET /students", authMw(adminOnly(http.HandlerFunc(studentHandler.ListAllStudents)))) // Only admin can list all students
-	mux.Handle("GET /students/{id}", authMw(http.HandlerFunc(studentHandler.GetStudentByID)))
+	mux.Handle("GET /students/me", authMw(http.HandlerFunc(studentHandler.GetStudentByUserID)))
+	mux.Handle("GET /students/{id}", authMw(adminOnly(http.HandlerFunc(studentHandler.GetStudentByID))))
 	mux.Handle("PATCH /students/{id}", authMw(adminOnly(http.HandlerFunc(studentHandler.UpdateStudent))))  // Only admin can update student
 	mux.Handle("DELETE /students/{id}", authMw(adminOnly(http.HandlerFunc(studentHandler.DeleteStudent)))) // Only admin can delete student
 
