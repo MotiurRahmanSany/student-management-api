@@ -69,37 +69,46 @@ func (h *CourseHandler) CreateCourse(w http.ResponseWriter, r *http.Request) {
 
 func (h *CourseHandler) ListAllCourses(w http.ResponseWriter, r *http.Request) {
 	limit := int32(10) // Default limit
-	offset := int32(0) // Default offset
+	page := int32(0)   // Default offset
 
 	if v := r.URL.Query().Get("limit"); v != "" {
 		if l, err := strconv.ParseInt(v, 10, 32); err == nil {
 			limit = int32(l)
 		}
 	}
-
-	if v := r.URL.Query().Get("offset"); v != "" {
-		if o, err := strconv.ParseInt(v, 10, 32); err == nil {
-			offset = int32(o)
+	if v := r.URL.Query().Get("page"); v != "" {
+		if p, err := strconv.ParseInt(v, 10, 32); err == nil {
+			page = int32(p)
 		}
 	}
 
 	if limit <= 0 {
 		limit = 10
 	}
-	if offset < 0 {
-		offset = 0
-	}
 	if limit > 100 {
 		limit = 100
 	}
+	if page <= 0 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit // convert page → offset for SQL
 
 	courses, err := h.service.ListCourses(r.Context(), limit, offset)
 	if err != nil {
 		_ = response.Error(w, http.StatusInternalServerError, "Failed to list courses", err)
 		return
 	}
-	_ = response.Success(w, http.StatusOK, "Courses retrieved successfully", courses)
 
+	total, err := h.service.CountCourses(r.Context())
+	if err != nil {
+		_ = response.Error(w, http.StatusInternalServerError, "Failed to count courses", err)
+		return
+	}
+	// _ = response.Success(w, http.StatusOK, "Courses retrieved successfully", courses)
+	
+	_ = response.Success(w, http.StatusOK, "Courses retrieved successfully",
+		response.NewPaginatedData(courses, page, limit, total))
 }
 
 func (h *CourseHandler) GetCourseByID(w http.ResponseWriter, r *http.Request) {

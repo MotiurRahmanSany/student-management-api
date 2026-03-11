@@ -24,6 +24,10 @@ ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
 
 
+-- name: CountCourses :one
+SELECT COUNT(*) FROM courses;
+
+
 -- name: UpdateCourse :one
 UPDATE courses
 SET

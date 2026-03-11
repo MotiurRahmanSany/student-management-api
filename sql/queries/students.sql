@@ -32,6 +32,10 @@ ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
 
 
+-- name: CountStudents :one
+SELECT COUNT(*) FROM students;
+
+
 -- name: UpdateStudent :one
 UPDATE students
 SET

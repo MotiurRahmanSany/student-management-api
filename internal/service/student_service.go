@@ -14,17 +14,18 @@ type StudentService interface {
 	RegisterStudent(ctx context.Context, userID, fullName string, dob time.Time, dept string) (domain.Student, error)
 	GetStudentByUserID(ctx context.Context, userID string) (domain.Student, error)
 	ListAllStudents(ctx context.Context, limit, offset int32) ([]domain.Student, error)
+	CountStudents(ctx context.Context) (int64, error)
 	GetStudentByID(ctx context.Context, id int64) (domain.Student, error)
 	UpdateStudent(ctx context.Context, id int64, fullName *string, dob *time.Time, dept *string, status *string) (domain.Student, error)
 	DeleteStudent(ctx context.Context, id int64) error
 }
 
 var (
-	ErrStudentAlreadyExists = errors.New("Student with the given user ID already exists")
-	ErrStudentNotFound      = errors.New("Student not found")
-	ErrStudentProfileNotFound = errors.New("Student profile not created yet")
-	ErrNoFieldsProvidedForUpdate     = errors.New("No field provided for update")
-	ErrInvalidStatus        = errors.New("Invalid status value")
+	ErrStudentAlreadyExists      = errors.New("Student with the given user ID already exists")
+	ErrStudentNotFound           = errors.New("Student not found")
+	ErrStudentProfileNotFound    = errors.New("Student profile not created yet")
+	ErrNoFieldsProvidedForUpdate = errors.New("No field provided for update")
+	ErrInvalidStatus             = errors.New("Invalid status value")
 )
 
 func isValidStatus(status string) bool {
@@ -75,9 +76,12 @@ func (s *studentService) GetStudentByUserID(ctx context.Context, userID string) 
 	return student, nil
 }
 
-
 func (s *studentService) ListAllStudents(ctx context.Context, limit, offset int32) ([]domain.Student, error) {
 	return s.studentRepo.ListStudents(ctx, limit, offset)
+}
+
+func (s *studentService) CountStudents(ctx context.Context) (int64, error) {
+	return s.studentRepo.CountStudents(ctx)
 }
 
 func (s *studentService) GetStudentByID(ctx context.Context, id int64) (domain.Student, error) {

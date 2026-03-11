@@ -11,7 +11,9 @@ import (
 )
 
 type Querier interface {
+	CountCourses(ctx context.Context) (int64, error)
 	CountEnrollmentsByCourse(ctx context.Context, courseID int64) (int64, error)
+	CountStudents(ctx context.Context) (int64, error)
 	CreateCourse(ctx context.Context, arg CreateCourseParams) (Course, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (CreateRefreshTokenRow, error)
 	CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error)

@@ -21,7 +21,7 @@ func AuthMiddleware(jwtManager *auth.JWTManager) func(http.Handler) http.Handler
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" || (!strings.HasPrefix(authHeader, "Bearer ")) {
-				response.Error(w, http.StatusUnauthorized, "Invalid authorization header", nil)
+				_ = response.Error(w, http.StatusUnauthorized, "Invalid authorization header", nil)
 				return
 			}
 
@@ -29,7 +29,7 @@ func AuthMiddleware(jwtManager *auth.JWTManager) func(http.Handler) http.Handler
 
 			claims, err := jwtManager.Verify(tokenStr)
 			if err != nil {
-				response.Error(w, http.StatusUnauthorized, "Invalid token", nil)
+				_ = response.Error(w, http.StatusUnauthorized, "Invalid token", nil)
 				return
 
 			}
@@ -46,7 +46,7 @@ func AdminOnly(next http.Handler) http.Handler{
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		role, ok := r.Context().Value(RoleContextKey).(string)
 		if !ok || role != "admin" {
-			response.Error(w, http.StatusForbidden, "Forbidden: Admin access required", nil)
+			_ = response.Error(w, http.StatusForbidden, "Forbidden: Admin access required", nil)
 			return
 		}
 		

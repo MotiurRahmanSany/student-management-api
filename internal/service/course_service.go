@@ -19,6 +19,7 @@ var (
 type CourseService interface {
 	CreateCourse(ctx context.Context, title, code string, credit, capacity int32) (domain.Course, error)
 	ListCourses(ctx context.Context, limit, offset int32) ([]domain.Course, error)
+	CountCourses(ctx context.Context) (int64, error)
 	GetCourseByID(ctx context.Context, id int64) (domain.Course, error)
 	UpdateCourse(ctx context.Context, id int64, title, code *string, credit, capacity *int32) (domain.Course, error)
 	DeleteCourse(ctx context.Context, id int64) error
@@ -43,6 +44,10 @@ func (s *courseService) CreateCourse(ctx context.Context, title, code string, cr
 
 func (s *courseService) ListCourses(ctx context.Context, limit, offset int32) ([]domain.Course, error) {
 	return s.repo.ListCourses(ctx, limit, offset)
+}
+
+func (s *courseService) CountCourses(ctx context.Context) (int64, error) {
+	return s.repo.CountCourses(ctx)
 }
 
 func (s *courseService) GetCourseByID(ctx context.Context, id int64) (domain.Course, error) {

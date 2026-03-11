@@ -14,6 +14,7 @@ type StudentRepository interface {
 	GetStudentByID(ctx context.Context, id int64) (domain.Student, error)
 	GetStudentByUserID(ctx context.Context, userID string) (domain.Student, error)
 	ListStudents(ctx context.Context, limit, offset int32) ([]domain.Student, error)
+	CountStudents(ctx context.Context) (int64, error)
 	UpdateStudent(ctx context.Context, id int64, fullName string, dob time.Time, dept, status string) (domain.Student, error)
 	DeleteStudent(ctx context.Context, id int64) error
 }
@@ -139,6 +140,10 @@ func (r *studentRepository) ListStudents(ctx context.Context, limit, offset int3
 	return students, nil
 }
 
+func (r *studentRepository) CountStudents(ctx context.Context) (int64, error) {
+	return r.q.CountStudents(ctx)
+}
+
 func (r *studentRepository) UpdateStudent(ctx context.Context, id int64, fullName string, dob time.Time, dept, status string) (domain.Student, error) {
 	var pgDob pgtype.Date
 
@@ -156,7 +161,7 @@ func (r *studentRepository) UpdateStudent(ctx context.Context, id int64, fullNam
 		Status:      status,
 	})
 
-	if err != nil{
+	if err != nil {
 		return domain.Student{}, err
 	}
 
