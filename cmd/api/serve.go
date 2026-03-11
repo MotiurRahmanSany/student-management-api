@@ -31,15 +31,18 @@ func serve(config *config.Config) {
 	userRepo := repository.NewUserRepository(queries)
 	studentRepo := repository.NewStudentRepository(queries)
 	courseRepo := repository.NewCourseRepository(queries)
+	enrollmentRepo := repository.NewEnrollmentRepository(queries)
 
 	authService := service.NewAuthService(userRepo, tokenRepo, jwtManager)
 	studentService := service.NewStudentService(studentRepo)
 	courseService := service.NewCourseService(courseRepo)
+	enrollmentService := service.NewEnrollmentService(enrollmentRepo, courseRepo, studentRepo)
 
 	healthHandler := handlers.NewHealthHandler()
 	authHandler := handlers.NewAuthHandler(authService)
 	studentHandler := handlers.NewStudentHandler(studentService)
 	courseHandler := handlers.NewCourseHandler(courseService)
+	enrollmentHandler := handlers.NewEnrollmentHandler(enrollmentService)
 
 	mux := router.Setup(
 		jwtManager,
@@ -47,6 +50,7 @@ func serve(config *config.Config) {
 		authHandler,
 		studentHandler,
 		courseHandler,
+		enrollmentHandler,
 	)
 
 	fmt.Printf("Server is running on port %d\n", config.HttpPort)

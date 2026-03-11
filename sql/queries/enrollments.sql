@@ -25,3 +25,7 @@ SELECT s.id, s.full_name, s.department, s.status, s.created_at
 FROM students s
 JOIN enrollments e ON e.student_id = s.id
 WHERE e.course_id = $1;
+
+
+-- name: CountEnrollmentsByCourse :one
+SELECT COUNT(*) FROM enrollments WHERE course_id = $1;

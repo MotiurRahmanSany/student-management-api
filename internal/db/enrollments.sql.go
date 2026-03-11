@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countEnrollmentsByCourse = `-- name: CountEnrollmentsByCourse :one
+SELECT COUNT(*) FROM enrollments WHERE course_id = $1
+`
+
+func (q *Queries) CountEnrollmentsByCourse(ctx context.Context, courseID int64) (int64, error) {
+	row := q.db.QueryRow(ctx, countEnrollmentsByCourse, courseID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const enrollStudent = `-- name: EnrollStudent :one
 INSERT INTO enrollments (
     student_id,
