@@ -30,23 +30,25 @@ func Setup(
 	// Protected Routes - require authentication
 	
 	authMw := middleware.AuthMiddleware(jwtManager)
+	adminOnly := middleware.AdminOnly
+	
 	
 	mux.Handle("GET /auth/me", authMw(http.HandlerFunc(authHandler.GetMe)))
 	mux.Handle("POST /auth/logout", authMw(http.HandlerFunc(authHandler.Logout)))
 
 	// student
 	mux.Handle("POST /students", authMw(http.HandlerFunc(studentHandler.RegisterStudent)))
-	mux.Handle("GET /students", authMw(http.HandlerFunc(studentHandler.ListAllStudents)))
-	mux.Handle("GET /students/{id}", authMw(http.HandlerFunc(studentHandler.GetStudentByID))) // Expecting /students/{id}
-	mux.Handle("PATCH /students/{id}", authMw(http.HandlerFunc(studentHandler.UpdateStudent))) // Expecting /students/{id}
-	mux.Handle("DELETE /students/{id}", authMw(http.HandlerFunc(studentHandler.DeleteStudent))) // Expecting /students/{id} 
+	mux.Handle("GET /students", authMw(adminOnly(http.HandlerFunc(studentHandler.ListAllStudents)))) // Only admin can list all students
+	mux.Handle("GET /students/{id}", authMw(http.HandlerFunc(studentHandler.GetStudentByID)))
+	mux.Handle("PATCH /students/{id}", authMw(adminOnly(http.HandlerFunc(studentHandler.UpdateStudent)))) // Only admin can update student
+	mux.Handle("DELETE /students/{id}", authMw(adminOnly(http.HandlerFunc(studentHandler.DeleteStudent)))) // Only admin can delete student
 	
 	// course
-	mux.Handle("POST /courses", authMw(http.HandlerFunc(courseHandler.CreateCourse)))
+	mux.Handle("POST /courses", authMw(adminOnly(http.HandlerFunc(courseHandler.CreateCourse)))) // Only admin can create course
 	mux.Handle("GET /courses", authMw(http.HandlerFunc(courseHandler.ListAllCourses)))
 	mux.Handle("GET /courses/{id}", authMw(http.HandlerFunc(courseHandler.GetCourseByID))) // Expecting /courses/{id}
-	mux.Handle("PATCH /courses/{id}", authMw(http.HandlerFunc(courseHandler.UpdateCourse))) // Expecting /courses/{id}
-	mux.Handle("DELETE /courses/{id}", authMw(http.HandlerFunc(courseHandler.DeleteCourse))) // Expecting /courses/{id}
+	mux.Handle("PATCH /courses/{id}", authMw(adminOnly(http.HandlerFunc(courseHandler.UpdateCourse)))) // Only admin can update course
+	mux.Handle("DELETE /courses/{id}", authMw(adminOnly(http.HandlerFunc(courseHandler.DeleteCourse)))) // Only admin can delete course
 	
 	return mux
 }

@@ -13,6 +13,7 @@ type contextKey string
 
 const (
 	UserContextKey contextKey = "userID"
+	RoleContextKey contextKey = "role"
 )
 
 func AuthMiddleware(jwtManager *auth.JWTManager) func(http.Handler) http.Handler {
@@ -34,8 +35,21 @@ func AuthMiddleware(jwtManager *auth.JWTManager) func(http.Handler) http.Handler
 			}
 
 			ctx := context.WithValue(r.Context(), UserContextKey, claims.UserID)
-
+			ctx = context.WithValue(ctx, RoleContextKey, claims.Role)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+
+func AdminOnly(next http.Handler) http.Handler{
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+		role, ok := r.Context().Value(RoleContextKey).(string)
+		if !ok || role != "admin" {
+			response.Error(w, http.StatusForbidden, "Forbidden: Admin access required", nil)
+			return
+		}
+		
+		next.ServeHTTP(w, r)
+	})
 }

@@ -6,6 +6,9 @@ GOOSE_MIGRATION_DIR := $(CURDIR)/sql/migrations
 
 .PHONY: sqlc migrate-up migrate-down run stop
 
+seed-admin:
+	go run ./cmd/seed/main.go
+
 sqlc:
 	sqlc generate
 
@@ -23,4 +26,3 @@ run:
 ## Stop the application and remove containers
 stop:
 	docker compose down
-	

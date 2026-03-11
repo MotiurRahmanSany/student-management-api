@@ -75,7 +75,7 @@ func (s *authService) Login(ctx context.Context, email, password string) (LoginR
 		return LoginResponse{}, err
 	}
 
-	accessToken, err := s.jwt.Generate(user.ID)
+	accessToken, err := s.jwt.Generate(user.ID, user.Role)
 
 	if err != nil {
 		return LoginResponse{}, err
@@ -128,7 +128,7 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (Lo
 		return LoginResponse{}, err
 	}
 
-	newAccessToken, err := s.jwt.Generate(user.ID)
+	newAccessToken, err := s.jwt.Generate(user.ID, user.Role)
 	if err != nil{
 		return LoginResponse{}, err
 	}
