@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/MotiurRahmanSany/student-management-api/internal/api/handlers"
+	"github.com/MotiurRahmanSany/student-management-api/internal/api/middleware"
 	"github.com/MotiurRahmanSany/student-management-api/internal/api/router"
 	"github.com/MotiurRahmanSany/student-management-api/internal/auth"
 	"github.com/MotiurRahmanSany/student-management-api/internal/config"
@@ -53,10 +54,12 @@ func serve(config *config.Config) {
 		enrollmentHandler,
 	)
 
+	loggedMux := middleware.Logger(mux)
+
 	fmt.Printf("Server is running on port %d\n", config.HttpPort)
 	fmt.Printf("Base Url is: http:localhost:%d\n", config.HttpPort)
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", config.HttpPort), mux); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", config.HttpPort), loggedMux); err != nil {
 		fmt.Printf("Error starting server: %v\n", err.Error())
 	}
 
